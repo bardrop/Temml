@@ -2032,6 +2032,9 @@ const test = () => {
   new Expect(r`\gdef\foo|{}\foo`).toNotParse()
   new Expect(r`\gdef\foo#1|{#1}\foo1`).toNotParse()
   new Expect(r`\gdef\foo#1|{#1}\foo1}|`).toNotParse()
+  new Expect(r`\gdef\foo#1.{[#1]}\foo{a}.`).toParseLike(r`[a]`)
+  new Expect(r`\gdef\foo#1.{[#1]}\foo{a}{b}.`).toParseLike(r`[{a}{b}]`)
+  new Expect(r`\gdef\foo#1.{[#1]}\foo{a}^{b}.`).toParseLike(r`[{a}^{b}]`)
 
   assertion = "In a macro expander, \\edef should expand definition"
   new Expect(r`\def\foo{a}\edef\bar{\foo}\def\foo{}\bar`).toParseLike(`a`)
@@ -2193,6 +2196,12 @@ const test = () => {
 
   assertion = "\\textbf arguments do generate groups"
   new Expect("\\def\\x{a}\\x\\textbf{\\x\\def\\x{b}\\x}\\x").toParseLike(r`a\textbf{ab}a`)
+
+  assertion = "\\sqrt optional arguments only lose braces that enclose the whole argument"
+  new Expect(r`\sqrt[{3}]{2}`).toParseLike(r`\sqrt[3]{2}`)
+  new Expect(r`\sqrt[{a}^{b}]{x}`).toParseLike(r`\sqrt[{{a}^{b}}]{x}`)
+  new Expect(r`\sqrt[{a}{b}]{x}`).toParseLike(r`\sqrt[{{a}{b}}]{x}`)
+  new Expect(r`\sqrt[{a}+{b}]{x}`).toParseLike(r`\sqrt[{{a}+{b}}]{x}`)
 
   assertion = "\\sqrt optional arguments generate groups"
   new Expect("\\def\\x{a}\\def\\y{a}\\x\\y" + "\\sqrt[\\def\\x{b}\\x]{\\def\\y{b}\\y}\\x\\y").toParseLike(r`aa\sqrt[b]{b}aa`)
